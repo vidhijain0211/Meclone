@@ -1,0 +1,5 @@
+{
+  "lock_enabled": true,
+  "lock_type": "pin",     
+  "lock_value": "1234"    
+}
