@@ -1,60 +1,63 @@
-import json
-import os
+import sqlite3
 import datetime
-from sentence_transformers import SentenceTransformer, util
-DATA_FILE = "data/reflections.json"
-model = SentenceTransformer('all-MiniLM-L6-v2')
+from backend.session_manager import SessionManager
+from backend.memory_engine import init_memory_table, DB_PATH
 
-def save_reflection(text):
-    thoughts = load_reflections()
+def save_reflection(text, user_id=None):
+    if user_id is None:
+        user_id = SessionManager().get_logged_in_user()
+    if not user_id:
+        return
+    init_memory_table()
     timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    thoughts.append({"text": text, "timestamp": timestamp})
-    save_reflections(thoughts)
+    with sqlite3.connect(DB_PATH) as conn:
+        c = conn.cursor()
+        c.execute("INSERT INTO thoughts (user_id, timestamp, content) VALUES (?, ?, ?)", (user_id, timestamp, text))
+        conn.commit()
 
 
-def load_reflections():
-    if not os.path.exists(DATA_FILE):
+def get_all_reflections(user_id=None):
+    if user_id is None:
+        user_id = SessionManager().get_logged_in_user()
+    if not user_id:
         return []
-    with open(DATA_FILE, "r") as file:
-        return json.load(file)
+    init_memory_table()
+    with sqlite3.connect(DB_PATH) as conn:
+        c = conn.cursor()
+        c.execute("SELECT content, timestamp FROM thoughts WHERE user_id = ? ORDER BY timestamp DESC", (user_id,))
+        return c.fetchall()
 
 
-def save_reflections(thoughts):
-    os.makedirs(os.path.dirname(DATA_FILE), exist_ok=True)
-    with open(DATA_FILE, "w") as file:
-        json.dump(thoughts, file, indent=4)
+def delete_reflection(text, user_id=None):
+    if user_id is None:
+        user_id = SessionManager().get_logged_in_user()
+    if not user_id:
+        return
+    init_memory_table()
+    with sqlite3.connect(DB_PATH) as conn:
+        c = conn.cursor()
+        c.execute("DELETE FROM thoughts WHERE user_id = ? AND content = ?", (user_id, text))
+        conn.commit()
 
 
-def get_all_reflections():
-    thoughts = load_reflections()
-    return [(t["text"], t["timestamp"]) for t in thoughts]
-
-
-def delete_reflection(text):
-    thoughts = load_reflections()
-    thoughts = [t for t in thoughts if t["text"] != text]
-    save_reflections(thoughts)
-
-
-def get_relevant_reflection(query, top_k=1):
-    try:
-        with open(DATA_FILE, "r") as f:
-            thoughts = json.load(f)
-    except:
+def get_relevant_reflection(query, user_id=None, top_k=1):
+    # Import here to avoid heavy import at module level
+    from sentence_transformers import SentenceTransformer, util
+    if user_id is None:
+        user_id = SessionManager().get_logged_in_user()
+    if not user_id:
         return None
-
-    if not thoughts:
-        return None
-
-    # Extract only text part for comparison
-    texts = [t["text"] for t in thoughts]
-
-    # Get embeddings
+    init_memory_table()
+    with sqlite3.connect(DB_PATH) as conn:
+        c = conn.cursor()
+        c.execute("SELECT content FROM thoughts WHERE user_id = ?", (user_id,))
+        rows = c.fetchall()
+        if not rows:
+            return None
+        texts = [row[0] for row in rows]
+    model = SentenceTransformer('all-MiniLM-L6-v2')
     query_embedding = model.encode(query, convert_to_tensor=True)
     text_embeddings = model.encode(texts, convert_to_tensor=True)
-
-    # Compute similarity scores
     scores = util.pytorch_cos_sim(query_embedding, text_embeddings)[0]
     top_result = scores.argmax().item()
-
-    return texts[top_result]  # ✅ only return the text (no time)
+    return texts[top_result] if texts else None

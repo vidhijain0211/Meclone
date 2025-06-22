@@ -7,6 +7,7 @@ from kivymd.uix.button import MDRaisedButton
 from kivymd.uix.dialog import MDDialog
 from kivy.uix.boxlayout import BoxLayout
 from backend.reflection import get_all_reflections, delete_reflection
+from backend.session_manager import SessionManager
 from functools import partial
 
 class SavedThoughtsScreen(MDScreen):
@@ -37,7 +38,8 @@ class SavedThoughtsScreen(MDScreen):
 
     def load_thoughts(self):
         self.list_container.clear_widgets()
-        thoughts = get_all_reflections()
+        user_id = SessionManager().get_logged_in_user()
+        thoughts = get_all_reflections(user_id)
         if thoughts:
             for text, timestamp in thoughts:
                 item = OneLineAvatarIconListItem(text=text)
@@ -51,7 +53,8 @@ class SavedThoughtsScreen(MDScreen):
             self.list_container.add_widget(MDLabel(text="No saved thoughts found.", halign="center"))
 
     def delete_thought(self, thought_text, *args):
-        delete_reflection(thought_text)
+        user_id = SessionManager().get_logged_in_user()
+        delete_reflection(thought_text, user_id)
         self.load_thoughts()
 
     def go_back(self, instance):

@@ -16,6 +16,22 @@ def init_memory_table():
         ''')
         conn.commit()
 
+def init_user_lock_table():
+    Path("database").mkdir(exist_ok=True)
+    with sqlite3.connect(DB_PATH) as conn:
+        c = conn.cursor()
+        c.execute('''
+            CREATE TABLE IF NOT EXISTS user_lock (
+                user_id INTEGER PRIMARY KEY,
+                lock_enabled BOOLEAN,
+                lock_type TEXT,
+                lock_value TEXT,
+                security_question TEXT,
+                security_answer TEXT
+            )
+        ''')
+        conn.commit()
+
 def save_thought(user_id, timestamp, content):
     init_memory_table()
     with sqlite3.connect(DB_PATH) as conn:

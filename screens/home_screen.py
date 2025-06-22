@@ -65,7 +65,7 @@ class HomeScreen(MDScreen):
             text="Welcome!",
             halign="center",
             theme_text_color="Primary",
-            font_style="H6"
+            font_style="H6",
         )
 
         self.layout.add_widget(self.welcome_label)
@@ -84,6 +84,10 @@ class HomeScreen(MDScreen):
             self.session.clear_session()
             toast("Logged out successfully!")
             self.manager.current = "entry"
+        elif screen_name == "lock":
+            lock_screen = self.manager.get_screen("lock")
+            lock_screen.open_settings_mode()
+            self.manager.current = "lock"
         else:
             self.manager.current = screen_name
 
@@ -91,5 +95,13 @@ class HomeScreen(MDScreen):
         if not self.session.is_logged_in():
             self.manager.current = "login"
         else:
-            current_user = self.session.get_logged_in_user()
-            self.welcome_label.text = f"Welcome, {current_user}!" if current_user else "Welcome to MeClone!"
+            current_user_id = self.session.get_logged_in_user()
+            if current_user_id:
+                from backend.auth import get_username_by_id
+                username = get_username_by_id(current_user_id)
+                if username:
+                    self.welcome_label.text = f"Welcome {username}! What's on your MIND ?"
+                else:
+                    self.welcome_label.text = "Welcome to MeClone!"
+            else:
+                self.welcome_label.text = "Welcome to MeClone!"

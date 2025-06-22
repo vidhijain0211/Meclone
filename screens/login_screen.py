@@ -43,7 +43,11 @@ class LoginScreen(MDScreen):
                 from screens.home_screen import HomeScreen
                 self.manager.add_widget(HomeScreen(name="home"))
 
-            self.manager.current = "home"
+            # If app lock is enabled for this user, go to lock screen first
+            if self.session.is_app_lock_enabled():
+                self.manager.current = "lock"
+            else:
+                self.manager.current = "home"
         else:
             from kivymd.toast import toast
             toast("Invalid username or password")
