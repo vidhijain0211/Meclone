@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.db
+user_profiles.json
+assets/sounds/
+config/
+buildozer.spec
