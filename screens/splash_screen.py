@@ -7,6 +7,9 @@ from kivy.animation import Animation
 from kivymd.uix.spinner import MDSpinner
 from backend.session_manager import SessionManager
 from threading import Thread
+from kivymd.uix.card import MDCard
+from kivymd.uix.scrollview import MDScrollView
+from kivy.uix.widget import Widget
 import logging
 
 
@@ -26,21 +29,37 @@ class SplashScreen(MDScreen):
     def build_ui(self):
         self.layout = MDBoxLayout(
             orientation="vertical",
-            spacing=25,
-            padding=50,
+            spacing=0,
+            padding=0,
             pos_hint={"center_x": 0.5, "center_y": 0.5},
+            size_hint=(1, 1),
+        )
+        # Center the card using a BoxLayout with center alignment
+        center_box = MDBoxLayout(
+            orientation="vertical",
+            size_hint=(1, 1),
+            padding=0,
+            spacing=0,
+        )
+        center_box.add_widget(Widget(size_hint_y=0.25))
+        card = MDCard(
+            orientation='vertical',
+            padding=[0, 0, 0, 0],
+            spacing=0,
             size_hint=(None, None),
             size=(320, 400),
+            elevation=12,
+            radius=[20, 20, 20, 20],
+            pos_hint={"center_x": 0.5},
         )
-
         # App Icon
         self.icon = Image(
             source="assets/icon.png",
             size_hint=(None, None),
             size=(100, 100),
-            opacity=0,  # 🔘 Start hidden
+            opacity=0,  # Start hidden
+            pos_hint={"center_x": 0.5},
         )
-
         # Welcome Label
         self.label = MDLabel(
             text="Welcome to MeClone",
@@ -48,22 +67,30 @@ class SplashScreen(MDScreen):
             theme_text_color="Custom",
             text_color=(0.1, 0.1, 0.1, 1),
             font_style="H5",
-            opacity=0,  # 🔘 Start hidden
+            opacity=0,  # Start hidden
+            size_hint_y=None,
+            height=40,
         )
-
         # Spinner
         self.spinner = MDSpinner(
             size_hint=(None, None),
             size=(46, 46),
             line_width=2.5,
             color=(0.1, 0.5, 1, 1),
-            opacity=0,  # 🔘 Start hidden
+            opacity=0,  # Start hidden
+            pos_hint={"center_x": 0.5},
         )
-
-        self.layout.add_widget(self.icon)
-        self.layout.add_widget(self.label)
-        self.layout.add_widget(self.spinner)
-
+        # Center all content in card
+        card.add_widget(Widget(size_hint_y=None, height=40))
+        card.add_widget(self.icon)
+        card.add_widget(Widget(size_hint_y=None, height=20))
+        card.add_widget(self.label)
+        card.add_widget(Widget(size_hint_y=None, height=20))
+        card.add_widget(self.spinner)
+        card.add_widget(Widget(size_hint_y=None, height=40))
+        center_box.add_widget(card)
+        center_box.add_widget(Widget(size_hint_y=0.25))
+        self.layout.add_widget(center_box)
         self.add_widget(self.layout)
 
     def animate_ui(self, dt):

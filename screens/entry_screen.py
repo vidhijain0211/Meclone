@@ -6,6 +6,7 @@ from kivymd.uix.label import MDLabel
 from kivymd.uix.toolbar import MDTopAppBar
 from kivy.uix.image import Image
 from kivy.metrics import dp
+from kivymd.uix.scrollview import MDScrollView
 
 
 class EntryScreen(MDScreen):
@@ -23,12 +24,14 @@ class EntryScreen(MDScreen):
         self.add_widget(toolbar)
 
         # Main layout
+        scroll = MDScrollView()
         root_layout = MDBoxLayout(
             orientation='vertical',
             padding=dp(20),
             spacing=dp(20),
-            pos_hint={"center_x": 0.5, "center_y": 0.5},
+            size_hint_y=None
         )
+        root_layout.bind(minimum_height=root_layout.setter('height'))
 
         # Card container
         card = MDCard(
@@ -55,6 +58,8 @@ class EntryScreen(MDScreen):
             halign="center",
             theme_text_color="Primary",
             font_style="H5",
+            size_hint_y=None,
+            height=40
         ))
 
         # Login Button
@@ -81,7 +86,8 @@ class EntryScreen(MDScreen):
 
         # Add card to root layout
         root_layout.add_widget(card)
-        self.add_widget(root_layout)
+        scroll.add_widget(root_layout)
+        self.add_widget(scroll)
 
     def go_to_login(self, instance):
         self.manager.transition.direction = 'left'
@@ -90,3 +96,8 @@ class EntryScreen(MDScreen):
     def go_to_register(self, instance):
         self.manager.transition.direction = 'right'
         self.manager.current = "register"
+
+    def on_pre_enter(self):
+        for child in self.walk():
+            if isinstance(child, MDCard):
+                child.canvas.ask_update()

@@ -5,6 +5,8 @@ from backend.session_manager import SessionManager
 from kivymd.toast import toast
 from kivymd.uix.label import MDLabel
 from kivymd.uix.button import MDFlatButton
+from kivymd.uix.card import MDCard
+from kivymd.uix.scrollview import MDScrollView
 
 class AppLockScreen(MDScreen):
     def __init__(self, **kwargs):
@@ -15,70 +17,82 @@ class AppLockScreen(MDScreen):
 
     def build_ui(self):
         from kivymd.uix.boxlayout import MDBoxLayout
+        self.clear_widgets()
+        scroll = MDScrollView()
         layout = MDBoxLayout(
             orientation='vertical',
-            padding=40,
-            spacing=20,
-            pos_hint={"center_x": 0.5, "center_y": 0.5},
-            size_hint=(0.8, None),
-            height="200dp"
+            padding=[24, 40, 24, 24],  # uniform padding
+            spacing=24,
+            size_hint_y=None
         )
+        layout.bind(minimum_height=layout.setter('height'))
         self.layout = layout
-        self.clear_widgets()
         if self.mode == "lock":
             if self.session.is_app_lock_enabled():
-                # Show unlock UI
-                self.code_input = MDTextField(hint_text="Enter App Lock Code", password=True)
-                unlock_btn = MDRaisedButton(text="Unlock", on_release=self.unlock)
-                reset_btn = MDFlatButton(text="Forgot Code?", on_release=self.show_forgot_lock_ui)
-                layout.add_widget(MDLabel(
+                card = MDCard(orientation='vertical', padding=24, spacing=18, size_hint=(1, None), height=260, radius=[20, 20, 20, 20], pos_hint={"center_x": 0.5})
+                self.code_input = MDTextField(hint_text="Enter App Lock Code", password=True, size_hint_y=None, height=48)
+                unlock_btn = MDRaisedButton(text="Unlock", on_release=self.unlock, size_hint_y=None, height=48)
+                reset_btn = MDFlatButton(text="Forgot Code?", on_release=self.show_forgot_lock_ui, size_hint_y=None, height=36)
+                card.add_widget(MDLabel(
                     text="Enter App Lock Code",
                     halign="center",
                     font_style="H5",
-                    theme_text_color="Primary"
+                    theme_text_color="Primary",
+                    size_hint_y=None,
+                    height=40
                 ))
-                layout.add_widget(self.code_input)
-                layout.add_widget(unlock_btn)
-                layout.add_widget(reset_btn)
+                card.add_widget(self.code_input)
+                card.add_widget(unlock_btn)
+                card.add_widget(reset_btn)
+                layout.add_widget(card)
             else:
-                # Show enable app lock UI
-                layout.add_widget(MDLabel(
+                card = MDCard(orientation='vertical', padding=24, spacing=18, size_hint=(1, None), height=180, radius=[20, 20, 20, 20], pos_hint={"center_x": 0.5})
+                card.add_widget(MDLabel(
                     text="App Lock is Disabled",
                     halign="center",
                     font_style="H5",
-                    theme_text_color="Primary"
+                    theme_text_color="Primary",
+                    size_hint_y=None,
+                    height=40
                 ))
-                enable_btn = MDRaisedButton(text="Enable App Lock", on_release=self.show_set_lock_ui)
-                layout.add_widget(enable_btn)
+                enable_btn = MDRaisedButton(text="Enable App Lock", on_release=self.show_set_lock_ui, size_hint_y=None, height=48)
+                card.add_widget(enable_btn)
+                layout.add_widget(card)
         elif self.mode == "settings":
-            # Only show enable, disable, update, forgot options
+            card = MDCard(orientation='vertical', padding=24, spacing=18, size_hint=(1, None), height=320, radius=[20, 20, 20, 20], pos_hint={"center_x": 0.5})
             if self.session.is_app_lock_enabled():
-                update_btn = MDRaisedButton(text="Update App Lock", on_release=self.show_update_lock_ui)
-                disable_btn = MDRaisedButton(text="Disable App Lock", on_release=self.show_disable_lock_ui)
-                reset_btn = MDRaisedButton(text="Forgot Code?", on_release=self.show_forgot_lock_ui)
-                back_btn = MDRaisedButton(text="Back", on_release=self.go_back)
-                layout.add_widget(MDLabel(
+                update_btn = MDRaisedButton(text="Update App Lock Code", on_release=self.show_update_lock_ui, size_hint_y=None, height=48)
+                disable_btn = MDRaisedButton(text="Disable App Lock", on_release=self.show_disable_lock_ui, size_hint_y=None, height=48)
+                reset_btn = MDRaisedButton(text="Forgot Code?", on_release=self.show_forgot_lock_ui, size_hint_y=None, height=48)
+                back_btn = MDRaisedButton(text="Back", on_release=self.go_back, size_hint_y=None, height=48)
+                card.add_widget(MDLabel(
                     text="App Lock Settings",
                     halign="center",
                     font_style="H5",
-                    theme_text_color="Primary"
+                    theme_text_color="Primary",
+                    size_hint_y=None,
+                    height=40
                 ))
-                layout.add_widget(update_btn)
-                layout.add_widget(disable_btn)
-                layout.add_widget(reset_btn)
-                layout.add_widget(back_btn)
+                card.add_widget(update_btn)
+                card.add_widget(disable_btn)
+                card.add_widget(reset_btn)
+                card.add_widget(back_btn)
             else:
-                enable_btn = MDRaisedButton(text="Enable App Lock", on_release=self.show_set_lock_ui)
-                back_btn = MDRaisedButton(text="Back", on_release=self.go_back)
-                layout.add_widget(MDLabel(
+                enable_btn = MDRaisedButton(text="Enable App Lock", on_release=self.show_set_lock_ui, size_hint_y=None, height=48)
+                back_btn = MDRaisedButton(text="Back", on_release=self.go_back, size_hint_y=None, height=48)
+                card.add_widget(MDLabel(
                     text="App Lock is Disabled",
                     halign="center",
                     font_style="H5",
-                    theme_text_color="Primary"
+                    theme_text_color="Primary",
+                    size_hint_y=None,
+                    height=40
                 ))
-                layout.add_widget(enable_btn)
-                layout.add_widget(back_btn)
-        self.add_widget(layout)
+                card.add_widget(enable_btn)
+                card.add_widget(back_btn)
+            layout.add_widget(card)
+        scroll.add_widget(layout)
+        self.add_widget(scroll)
 
     def on_pre_enter(self):
         self.build_ui()

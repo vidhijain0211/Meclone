@@ -9,6 +9,7 @@ from kivy.uix.boxlayout import BoxLayout
 from backend.reflection import get_all_reflections, delete_reflection
 from backend.session_manager import SessionManager
 from functools import partial
+from kivymd.uix.card import MDCard
 
 class SavedThoughtsScreen(MDScreen):
     def __init__(self, **kwargs):
@@ -19,17 +20,30 @@ class SavedThoughtsScreen(MDScreen):
     def build_ui(self):
         self.layout = MDBoxLayout(orientation='vertical', padding=20, spacing=10)
 
+        title_card = MDCard(
+            orientation='vertical',
+            padding=18,
+            size_hint_y=None,
+            radius=[20, 20, 20, 20],
+        )
         title = MDLabel(text="Saved Thoughts", halign="center", font_style="H5")
-        self.layout.add_widget(title)
+        title_card.add_widget(title)
+        self.layout.add_widget(title_card)
 
         self.scroll = MDScrollView()
         self.list_container = MDList()
         self.scroll.add_widget(self.list_container)
-
         self.layout.add_widget(self.scroll)
 
+        back_card = MDCard(
+            orientation='vertical',
+            padding=12,
+            size_hint_y=None,
+            radius=[12, 12, 12, 12],
+        )
         back_btn = MDRaisedButton(text="Back", pos_hint={"center_x": 0.5}, on_release=self.go_back)
-        self.layout.add_widget(back_btn)
+        back_card.add_widget(back_btn)
+        self.layout.add_widget(back_card)
 
         self.add_widget(self.layout)
 

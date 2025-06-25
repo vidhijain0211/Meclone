@@ -1,33 +1,7 @@
-# Python cache
 __pycache__/
 *.pyc
-
-# Config and session files
-config/session.json
-config/lock_config.json
-
-# App data
-data/reflections.json
+*.db
 user_profiles.json
-database/user_data.db
-
-# Auth backend (optional if it's sensitive)
-backend/auth.py
-
-# Buildozer spec (for mobile build)
+assets/sounds/
+config/
 buildozer.spec
-
-# Ignore logs or temp files
-*.log
-*.tmp
-*.bak
-
-# VS Code or PyCharm folders
-.vscode/
-.idea/
-
-# Ignore model weights or data
-*.pkl
-*.joblib
-*.pt
-*.onnx
